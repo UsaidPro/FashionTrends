@@ -28,17 +28,43 @@ for img in images:
    np.place(labels, labels != 15, [0])
    if(15 in labels):
       np.place(labels, labels == 15, [255])
-      #r, g, b = cv2.split(resized_original)
-      #masked_image = cv2.merge((r, g, b, labels[:512 - pad_x, :512 - pad_y].astype(np.uint8)))
    
-      #masked_image[masked_image[:, :, 3] == 255] = 0
-   
-      #Uncomment for black background
+      #Applying mask to convert non-human elements to black background
       masked_image = cv2.bitwise_and(resized_original, resized_original, mask=labels[:512 - pad_x, :512 - pad_y].astype(np.uint8))
-      
-      #Clustering
-      w, h, d = masked_image.shape
-      flat_image = np.reshape(masked_image, (w * h, d))
+      ret, thresh = cv2.threshold(cv2.cvtColor(masked_image, cv2.COLOR_BGR2GRAY), 5, 255, cv2.THRESH_BINARY)
+      image, contours, hireachy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+      lx = 100000000
+      ly = 100000000
+      rx = 0
+      ry = 0
+      for contour in contours:
+         largest = max(contours, key=cv2.contourArea)
+         x, y, w, h = cv2.boundingRect(largest)
+         lx = min(x, lx)
+         ly = min(y, ly)
+         rx = max(x+w, rx)
+         ry = max(y+h, ry)
+      #No need to check if contours don't exist due to checking if 15 is in labels before
+      crop = masked_image[ly:ry, lx:rx]
+      """
+      #Make image even for quicker resizing - commenting this all out since it will only speedup since cv2.pyrDown
+      #and pyrDown() only downscales by factors of 2.
+      if crop.shape[0] % 2 != 0:
+         crop = np.vstack((crop, np.zeros((1, crop.shape[1], 3))))
+      if crop.shape[1] % 2 != 0:
+         crop = np.hstack((crop, np.zeros((crop.shape[0], 1, 3))))
+      """
+      print(crop.shape)
+      #Converting image shape to square
+      if crop.shape[0] > crop.shape[1]:
+         crop = np.hstack((np.zeros((crop.shape[0], int((crop.shape[0] - crop.shape[1]) / 2), 3)), crop, np.zeros((crop.shape[0], int((crop.shape[0] - crop.shape[1]) / 2), 3))))
+      elif crop.shape[0] < crop.shape[1]:
+         crop = np.vstack((np.zeros((int((crop.shape[1] - crop.shape[0]) / 2), crop.shape[1], 3)), crop, np.zeros((int((crop.shape[1] - crop.shape[0]) / 2), crop.shape[1], 3))))
+      #Resizing image
+      resized_image = cv2.resize(crop, (128, 128))
+
+      w, h, d = resized_image.shape
+      flat_image = np.reshape(resized_image, (w * h, d))
       labels = kmeans.fit_predict(flat_image)
       labels_reshaped = labels.reshape((w, h, 1))
       final = np.zeros((w, h, d))
@@ -51,9 +77,9 @@ for img in images:
          i = np.where(order[:, 0] == ix)[0][0]
          final_flat[labels_reshaped[:, :, 0] == ix] = i
       
-      #cv2.cvtColor(final, cv2.COLOR_RGBA2BGRA, final)
-      #cv2.imwrite("C:/Users/usaid/Desktop/FashionTrends/AliImages/Cluster/" + os.path.basename(img).replace('jpg', 'png'), final)
       cv2.imwrite("C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/Clustered/" + os.path.basename(img), final)
+      #I also save a Numpy array of the clusters (a 2D array of cluster labels) for training to test 
+      #whether training just based on clusters rather than colors affects accuracy of model
       np.save("C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/Clustered/" + os.path.basename(img).replace('.jpg', '.npy'), final_flat)
    else:
       cv2.imwrite("C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/NotHuman/" + os.path.basename(img), image)

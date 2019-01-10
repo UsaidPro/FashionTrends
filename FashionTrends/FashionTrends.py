@@ -66,7 +66,7 @@ print(dataset.nunique())
 dataset = dataset.sample(frac=1).reset_index(drop=True)
 
 #Order the cluster set the same order as the dataset alphabetically.
-data = np.empty((dataset.shape[0], 512, 341))
+data = np.empty((dataset.shape[0], 128, 128))
 for index, row in dataset.iterrows():
    data[index] = clustered[row['File']]
 clustered.close()
@@ -94,14 +94,14 @@ y_train = y[:886]
 y_test = y[886:]
 
 #Use ImageDatasetGenerator to maybe vastly increase size of dataset!
-batch_size = 8
-epochs = 12
+batch_size = 64
+epochs = 32
 
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
+model.add(Conv2D(128, kernel_size=(3, 3),
                  activation='relu',
-                 input_shape=(512, 341, 1)))
-#model.add(Conv2D(64, (3, 3), activation='relu'))
+                 input_shape=(128, 128, 1)))
+model.add(Conv2D(64, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.25))
 model.add(Flatten())
