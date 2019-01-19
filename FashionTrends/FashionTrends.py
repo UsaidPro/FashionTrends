@@ -79,6 +79,7 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, Conv3D, MaxPooling3D
 from keras import backend as K
+from sklearn.metrics import classification_report
 
 data /= 4
 
@@ -113,9 +114,19 @@ model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy'])
 
-model.fit(x_train, y_train,
-          batch_size=batch_size,
-          epochs=epochs,
-          verbose=1,
-          validation_data=(x_test, y_test))
-score = model.evaluate(x_test, y_test, verbose=0)
+analyze = True
+if not analyze:
+   model.fit(x_train, y_train,
+             batch_size=batch_size,
+             epochs=epochs,
+             verbose=1,
+             validation_data=(x_test, y_test))
+   score = model.evaluate(x_test, y_test, verbose=0)
+   model.save_weights('weights.h5')
+   print(score)
+else:
+   model.load_weights('weights.h5')
+   pred = model.predict(x_test)
+   y_pred = np.zeros_like(pred)
+   y_pred[np.arange(len(pred)), pred.argmax(1)] = 1
+   print(classification_report(y_test, y_pred, target_names=['Shirt', 'Skirt', 'Pant', 'Dress']))
