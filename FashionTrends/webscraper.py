@@ -1,9 +1,15 @@
-#Webscraping
+"""
+Scrapes ChicTopia.com's webpages to generate preliminary dataset of different clothing items
+"""
 import urllib3
 from bs4 import BeautifulSoup
 import csv
 
 http = urllib3.PoolManager()
+
+"""
+Parses ChicTopia page to get possibly valuable information
+"""
 def parsePage(url):
    page = http.request('GET', url)
    soup = BeautifulSoup(page.data)
@@ -47,6 +53,8 @@ def parsePage(url):
          color = ''
          type = ''
    return (url.encode('utf-8'), dateText, userText.encode('utf-8'), tagStr.encode('utf-8'), descText.encode('utf-8'), clothingStr.encode('utf-8'))
+
+#Scrape ChicTopia for shirts
 url = 'http://chictopia.com/Shirt/info'
 pageIndex = 1
 lastPage = 40
@@ -62,6 +70,7 @@ with open('shirts.csv', mode='w') as file:
          if link.has_attr('href'):
             data = parsePage('http://chictopia.com' + link['href'])
             writer.writerow(data)
+#Scrape ChicTopia for skirts
 url = 'http://chictopia.com/Skirt/info'
 with open('skirts.csv', mode='w') as file:
    writer = csv.writer(file, delimiter=',', lineterminator='\n')
@@ -74,6 +83,7 @@ with open('skirts.csv', mode='w') as file:
          if link.has_attr('href'):
             data = parsePage('http://chictopia.com' + link['href'])
             writer.writerow(data)
+#Scrape ChicTopia for pants
 url = 'http://chictopia.com/Pant/info'
 with open('pants.csv', mode='w') as file:
    writer = csv.writer(file, delimiter=',', lineterminator='\n')
@@ -86,6 +96,7 @@ with open('pants.csv', mode='w') as file:
          if link.has_attr('href'):
             data = parsePage('http://chictopia.com' + link['href'])
             writer.writerow(data)
+#Scrape ChicTopia for dresses
 url = 'http://chictopia.com/Dress/info'
 with open('dresses.csv', mode='w') as file:
    writer = csv.writer(file, delimiter=',', lineterminator='\n')

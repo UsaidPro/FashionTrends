@@ -1,23 +1,29 @@
+"""
+Where the "cool stuff" happens - does final modifications to dataset and trains CNN model using dataset and predicts
+"""
 import pandas as pd
 import numpy as np
 import os
 
+#Put location of zip of cluster files here
+zip_loc = 'C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/Clustered/Clustered.zip'
 
 cols = ['URL', 'Date', 'User', 'Tags', 'Description', 'Clothing']
-dresses = pd.read_csv('C:/Users/usaid/Documents/Visual Studio 2015/Projects/FashionTrends/FashionTrends/dresses.csv', header=None)
+dresses = pd.read_csv('dresses.csv', header=None)
 dresses.columns = cols
 dresses['Dress'] = True
-pants = pd.read_csv('C:/Users/usaid/Documents/Visual Studio 2015/Projects/FashionTrends/FashionTrends/pants.csv', header=None)
+pants = pd.read_csv('pants.csv', header=None)
 pants.columns = cols
 pants['Pant'] = True
-skirts = pd.read_csv('C:/Users/usaid/Documents/Visual Studio 2015/Projects/FashionTrends/FashionTrends/skirts.csv', header=None)
+skirts = pd.read_csv('skirts.csv', header=None)
 skirts.columns = cols
 skirts['Skirt'] = True
-shirts = pd.read_csv('C:/Users/usaid/Documents/Visual Studio 2015/Projects/FashionTrends/FashionTrends/shirts.csv', header=None)
+shirts = pd.read_csv('shirts.csv', header=None)
 shirts.columns = cols
 shirts['Shirt'] = True
 dataset = pd.concat([dresses, pants, skirts, shirts])
 
+#Removes the utf-8 encoding that was converted to ascii when writing to CSV but still appears as UTF-8
 def clean(string):
    return string.split('\'')[1]
 
@@ -40,16 +46,11 @@ dataset['Shirt'] = dataset['Clothing'].str.contains('shirt', na=False, regex=Tru
 #y is now dataset['Pant'], dataset['Dress'], dataset['Skirt'] and dataset['Shirt']
 
 #Load cluster dataset
-clustered = np.load("C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/Clustered/Clustered.zip")
+clustered = np.load(zip_loc)
 
 print(dataset.shape)
 print(dataset['Img'].head())
 dataset = dataset[dataset['File'].isin(clustered.files)]
-
-print(dataset.shape)
-#print(clusters.shape)
-#print(headers.shape)
-print(dataset.nunique())
 
 #Drop duplicate images, making sure not to lose whether includes Dress/Pant/Skirt/etc
 dataset['Pant'] = dataset.groupby(['Img', 'Date'])['Pant'].transform('sum').clip_upper(1.0)
@@ -57,11 +58,6 @@ dataset['Skirt'] = dataset.groupby(['Img', 'Date'])['Skirt'].transform('sum').cl
 dataset['Dress'] = dataset.groupby(['Img', 'Date'])['Dress'].transform('sum').clip_upper(1.0)
 dataset['Shirt'] = dataset.groupby(['Img', 'Date'])['Shirt'].transform('sum').clip_upper(1.0)
 dataset = dataset.drop_duplicates(subset=['Img', 'Date'])
-
-print(dataset.shape)
-#print(clusters.shape)
-#print(headers.shape)
-print(dataset.nunique())
 
 dataset = dataset.sample(frac=1).reset_index(drop=True)
 
@@ -72,6 +68,7 @@ for index, row in dataset.iterrows():
 clustered.close()
 
 print(data[0].shape)
+
 #data is X, dataset['Shirt', 'Pant', 'Skirt', 'Dress'] is y
 #Only import keras if everything else works, since keras requires GPU and takes time to initialize
 
@@ -94,10 +91,11 @@ y = dataset[['Shirt', 'Skirt', 'Pant', 'Dress']].values
 y_train = y[:886]
 y_test = y[886:]
 
-#Use ImageDatasetGenerator to maybe vastly increase size of dataset!
+#TODO: Use ImageDatasetGenerator to maybe vastly increase size of dataset!
 batch_size = 64
 epochs = 32
 
+#Create and compile model
 model = Sequential()
 model.add(Conv2D(128, kernel_size=(3, 3),
                  activation='relu',
@@ -114,6 +112,7 @@ model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy'])
 
+#Change analyze flag depending on whether you want to switch between prediction or training
 analyze = True
 if not analyze:
    model.fit(x_train, y_train,

@@ -1,3 +1,6 @@
+"""
+Preprocesses images to reduce noise and generate dataset for training
+"""
 import cv2
 import glob
 from model import Deeplabv3
@@ -7,9 +10,12 @@ import os
 from sklearn.cluster import KMeans
 from pprint import pprint
 
-images = glob.glob("C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/*.jpg")
+image_dir = 'C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/'
+images = glob.glob(image_dir + '*.jpg')
 
+#Initialize DeepLab model
 deeplab_model = Deeplabv3()
+#I picked 4 because I felt that it works. Should test out more variations to see if accuracy improves
 kmeans = KMeans(4)
 print("Initialized Pipeline")
 i = 0
@@ -31,8 +37,10 @@ for img in images:
    
       #Applying mask to convert non-human elements to black background
       masked_image = cv2.bitwise_and(resized_original, resized_original, mask=labels[:512 - pad_x, :512 - pad_y].astype(np.uint8))
+      #Locate human elements (not-black)
       ret, thresh = cv2.threshold(cv2.cvtColor(masked_image, cv2.COLOR_BGR2GRAY), 5, 255, cv2.THRESH_BINARY)
       image, contours, hireachy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+      #Create smallest bounding box that contains all elements
       lx = 100000000
       ly = 100000000
       rx = 0
@@ -77,10 +85,10 @@ for img in images:
          i = np.where(order[:, 0] == ix)[0][0]
          final_flat[labels_reshaped[:, :, 0] == ix] = i
       
-      cv2.imwrite("C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/Clustered/" + os.path.basename(img), final)
+      cv2.imwrite(image_dir + "Clustered/" + os.path.basename(img), final)
       #I also save a Numpy array of the clusters (a 2D array of cluster labels) for training to test 
       #whether training just based on clusters rather than colors affects accuracy of model
-      np.save("C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/Clustered/" + os.path.basename(img).replace('.jpg', '.npy'), final_flat)
+      np.save(image_dir + "Clustered/" + os.path.basename(img).replace('.jpg', '.npy'), final_flat)
    else:
-      cv2.imwrite("C:/Users/usaid/Desktop/FashionTrends/Image_Data/Chictopia/Parsed/NotHuman/" + os.path.basename(img), image)
+      cv2.imwrite(image_dir + "NotHuman/" + os.path.basename(img), image)
    i += 1
