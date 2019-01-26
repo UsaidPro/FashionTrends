@@ -1,4 +1,4 @@
-This repository contains my work for team Maverick in DSC at University of Texas at Dallas. All code contained in this repository is my own (excluding libraries).
+This repository contains my work for team Maverick in DSC at University of Texas at Dallas. All code contained in this repository is my own (excluding libraries). I plan to halt this project for a while (since team members have all quit due to lack of time) and might revisit it during the summer. I have now posted it on Github with public permissions so that others may benefit.
 
 # FashionTrends
 This project is an effort to predict fashion trends over time using machine learning. Currently, I am able to classify different types of clothing (Shirts, Skirts, Pants, Dress) using images webscraped from chictopia.com and training a model built using Keras.
@@ -41,4 +41,4 @@ Result after training:
 
 These results are pretty good considering a small and potentially noisy dataset (~1200 images). For further improvements, I might use a GAN (Generational-Adversarial Network) which has been proven to do better for fashion classification and add more images to the dataset.
 
-**Disclaimer:**I am _not_ a professional (yet). For any other newbies who stumble upon this repository, don't treat these results as guarenteed good nor the methodology I used - there might be better alternatives I just don't have experience in yet.
+**Disclaimer:** I am _not_ a professional (yet). For any other newbies who stumble upon this repository, don't treat these results as guarenteed good nor the methodology I used - there might be better alternatives I just don't have experience in yet.
