@@ -37,7 +37,7 @@ My current model is a CNN with 2 convolutional layers and 2 dropout layers follo
 
 Result after training:
 
-![Results](/imgs/result.jpeg "Results)
+![Results](/imgs/result.jpeg "Results")
 
 These results are pretty good considering a small and potentially noisy dataset (~1200 images). For further improvements, I might use a GAN (Generational-Adversarial Network) which has been proven to do better for fashion classification and add more images to the dataset.
 
