@@ -14,10 +14,11 @@ Currently, this project is split into several files to make prototyping easier. 
 
 ## Details on how it works
 I use [BeautifulSoup](https://pypi.org/project/beautifulsoup4/) to parse webpages. Then, I download the images and start preprocessing.
+
 ### Preprocessing
 If `preprocessing.py` started with this image:
 
-![Original Image](/imgs/original.jpeg "Original Image")
+![Original Image](/imgs/original.jpg "Original Image")
 
 I remove the background (everything but humans) using [DeepLabv3+](https://github.com/bonlime/keras-deeplab-v3-plus).
 
@@ -25,6 +26,19 @@ I remove the background (everything but humans) using [DeepLabv3+](https://githu
 
 After removing the background, I then resize the image and perform k-means clustering using [KMeans from Scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html). Number of clusters currently is 4.
 
-![Resized and Clustered](/imgs/128size.png "Resized and Clustered")
+![Resized and Clustered](/imgs/128size.jpg "Resized and Clustered")
 
 Finally, I save the resized image along with a 2D NumPy array where each 2D location is the corresponding cluster value at that location based on cluster size and starting at 0 for largest cluster. This is then used for training.
+
+### Training
+`FashionTrends.py` first creates a pandas dataset using the CSVs from `webscraping.py` and then constructs a 3D numpy array of the arrays created from `preprocessing.py`. After this, training occurs.
+
+My current model is a CNN with 2 convolutional layers and 2 dropout layers followed by a softmax layer. Optimizer is Adadelta. For specifics, look at (/FashionTrends/FashionTrends.py#L99).
+
+Result after training:
+
+![Results](/imgs/result.jpeg "Results)
+
+These results are pretty good considering a small and potentially noisy dataset (~1200 images). For further improvements, I might use a GAN (Generational-Adversarial Network) which has been proven to do better for fashion classification and add more images to the dataset.
+
+**Disclaimer:**I am _not_ a professional (yet). For any other newbies who stumble upon this repository, don't treat these results as guarenteed good nor the methodology I used - there might be better alternatives I just don't have experience in yet.
