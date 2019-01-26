@@ -15,3 +15,16 @@ Currently, this project is split into several files to make prototyping easier. 
 ## Details on how it works
 I use [BeautifulSoup](https://pypi.org/project/beautifulsoup4/) to parse webpages. Then, I download the images and start preprocessing.
 ### Preprocessing
+If `preprocessing.py` started with this image:
+
+![Original Image](/imgs/original.jpeg "Original Image")
+
+I remove the background (everything but humans) using [DeepLabv3+](https://github.com/bonlime/keras-deeplab-v3-plus).
+
+![Removed Background](/imgs/removed.jpg "Removed Background")
+
+After removing the background, I then resize the image and perform k-means clustering using [KMeans from Scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html). Number of clusters currently is 4.
+
+![Resized and Clustered](/imgs/128size.png "Resized and Clustered")
+
+Finally, I save the resized image along with a 2D NumPy array where each 2D location is the corresponding cluster value at that location based on cluster size and starting at 0 for largest cluster. This is then used for training.
