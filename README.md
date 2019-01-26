@@ -1,4 +1,4 @@
-This repository contains my work for team Maverick in DSC at University of Texas at Dallas. All code contained in this repository is my work.
+This repository contains my work for team Maverick in DSC at University of Texas at Dallas. All code contained in this repository is my own (excluding libraries).
 
 # FashionTrends
 This project is an effort to predict fashion trends over time using machine learning. Currently, I am able to classify different types of clothing (Shirts, Skirts, Pants, Dress) using images webscraped from chictopia.com and training a model built using Keras.
@@ -14,3 +14,4 @@ Currently, this project is split into several files to make prototyping easier. 
 
 ## Details on how it works
 I use [BeautifulSoup](https://pypi.org/project/beautifulsoup4/) to parse webpages. Then, I download the images and start preprocessing.
+### Preprocessing
