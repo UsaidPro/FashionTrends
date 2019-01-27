@@ -248,7 +248,7 @@ ModelManifest.xml
 
 #Ignore pycache and checkpoints
 __pycache__/
-imgs/
+/FashionTrends/imgs/
 
 #Ignore weights
 *.h5
